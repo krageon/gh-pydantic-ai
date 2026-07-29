@@ -1,13 +1,11 @@
 import asyncio
 import time
-import webbrowser
 from collections.abc import AsyncGenerator, Generator
 from contextlib import suppress
 from dataclasses import dataclass
 from pathlib import Path
 from typing import cast
 
-import pyperclip
 import rich
 from httpx import AsyncClient, Auth, Request, Response
 
@@ -59,7 +57,7 @@ async def wait_for_login(
 
 async def try_get_access_token(
     *,
-    device_login_fallback: bool = False,
+    device_login_fallback: bool = True,
 ) -> str:
     CONFIG_ROOT.mkdir(parents=True, exist_ok=True)
 
@@ -79,12 +77,7 @@ async def try_get_access_token(
             f"Please open {device_code_info['verification_uri']} and enter the code: {device_code_info['user_code']}",
         )
 
-        with suppress(Exception):
-            pyperclip.copy(device_code_info["user_code"])
-        with suppress(Exception):
-            webbrowser.open_new_tab(device_code_info["verification_uri"])
-
-        async with asyncio.timeout(device_code_info["expires_in"]):
+        async with asyncio.timeout(180):
             access_token = await wait_for_login(
                 client,
                 device_code_info["device_code"],
@@ -99,6 +92,7 @@ async def get_copilot_token() -> DataStrAny:
     async with AsyncClient(
         base_url="https://api.github.com/",
     ) as client:
+        interact
         response = await client.get(
             "copilot_internal/v2/token",
             headers={
