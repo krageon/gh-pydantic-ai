@@ -24,6 +24,8 @@ def _normalise_completion(data: dict[str, Any]) -> dict[str, Any]:
     for i, choice in enumerate(choices):
         # `index` is absent on Anthropic responses.
         choice.setdefault("index", i)
+        if choice.get("index") is None:
+            choice["index"] = i
         if choice.get("finish_reason") is None:
             choice["finish_reason"] = "stop"
 
