@@ -44,11 +44,13 @@ async def wait_for_login(
             },
         )
 
+        rich.print("Not logged in yet, waiting for user to authenticate...", end="")
         match response.json():
             case {"access_token": str(access_token)}:
+                rich.print("")
                 return access_token
             case _:
-                rich.print("Not logged in yet, waiting for user to authenticate...")
+                rich.print(".", end="")
                 await asyncio.sleep(interval)
 
 
