@@ -15,7 +15,9 @@ from .consts import GITHUB_APP_SCOPES, GITHUB_CLIENT_ID
 from .headers import copilot_headers, github_headers, standard_headers
 from .types import DataStrAny
 
-CONFIG_ROOT = Path.home() / ".config" / "gh-copilot-pydantic-ai"
+import platformdirs
+
+CONFIG_ROOT = Path(platformdirs.user_config_dir("gh-copilot-pydantic-ai"))
 TOKEN_FILE = CONFIG_ROOT / "access_token.txt"
 
 

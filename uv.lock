@@ -175,6 +175,7 @@ source = { editable = "." }
 dependencies = [
     { name = "click" },
     { name = "httpx" },
+    { name = "platformdirs" },
     { name = "pydantic-ai-slim", extra = ["cli", "openai"] },
     { name = "pyperclip" },
 ]
@@ -190,6 +191,7 @@ dev = [
 requires-dist = [
     { name = "click", specifier = ">=8.2.1" },
     { name = "httpx", specifier = ">=0.28.1" },
+    { name = "platformdirs", specifier = ">=4.9.6" },
     { name = "pydantic-ai-slim", extras = ["openai", "cli"], specifier = ">=1.2.0" },
     { name = "pyperclip", specifier = ">=1.9.0" },
 ]
