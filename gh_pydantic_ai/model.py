@@ -3,14 +3,37 @@ from warnings import deprecated
 from openai import AsyncOpenAI
 from openai.types import chat
 from pydantic_ai import ModelResponse, ModelSettings
-from pydantic_ai.models.openai import OpenAIChatModel, OpenAIResponsesModel
+from pydantic_ai.models.openai import OpenAIChatModel, OpenAIResponsesModel, _ChatCompletion
 from pydantic_ai.profiles import ModelProfileSpec
 from pydantic_ai.providers import Provider
+from typing_extensions import Any
 
 from .consts import DEFAULT_MODEL, RESPONSES_API_MODELS
 from .provider import GHCopilotProvider
 from .types import GHCopilotModelName
 
+
+def _normalise_completion(data: dict[str, Any]) -> dict[str, Any]:
+    """Anthropic replies through gh copilot aren't openai-compliant so validation will fail.
+
+    This injects some things that might be missing
+    """
+    data.setdefault("object", "chat.completion")
+
+    choices = data.get("choices") or []
+    for i, choice in enumerate(choices):
+        # `index` is absent on Anthropic responses.
+        choice.setdefault("index", i)
+        if choice.get("finish_reason") is None:
+            choice["finish_reason"] = "stop"
+
+        message = choice.get("message")
+        if message is None:
+            message = {}
+            choice["message"] = message
+        message.setdefault("role", "assistant")
+
+    return data
 
 class GHCopilotChatModel(OpenAIChatModel):
     def __init__(
@@ -27,6 +50,10 @@ class GHCopilotChatModel(OpenAIChatModel):
             profile=profile,
             settings=settings,
         )
+
+    def _validate_completion(self, response: chat.ChatCompletion) -> _ChatCompletion:
+        data = _normalise_completion(response.model_dump())
+        return _ChatCompletion.model_validate(data)
 
     def _process_response(self, response: chat.ChatCompletion | str) -> ModelResponse:
         if isinstance(response, chat.ChatCompletion):
