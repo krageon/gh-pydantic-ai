@@ -1,19 +1,16 @@
 import asyncio
 import time
 from collections.abc import AsyncGenerator, Generator
-from contextlib import suppress
 from dataclasses import dataclass
 from pathlib import Path
 from typing import cast
 
+import platformdirs
 import rich
 from httpx import AsyncClient, Auth, Request, Response
-
 from .consts import GITHUB_APP_SCOPES, GITHUB_CLIENT_ID
 from .headers import copilot_headers, github_headers, standard_headers
 from .types import DataStrAny
-
-import platformdirs
 
 CONFIG_ROOT = Path(platformdirs.user_config_dir("gh-copilot-pydantic-ai"))
 TOKEN_FILE = CONFIG_ROOT / "access_token.txt"
@@ -33,9 +30,9 @@ async def get_device_code(client: AsyncClient) -> DataStrAny:
 
 
 async def wait_for_login(
-    client: AsyncClient,
-    device_code: str,
-    interval: float,
+        client: AsyncClient,
+        device_code: str,
+        interval: float,
 ) -> str:
     while True:
         response = await client.post(
@@ -56,8 +53,8 @@ async def wait_for_login(
 
 
 async def try_get_access_token(
-    *,
-    device_login_fallback: bool = True,
+        *,
+        device_login_fallback: bool = True,
 ) -> str:
     CONFIG_ROOT.mkdir(parents=True, exist_ok=True)
 
@@ -68,8 +65,8 @@ async def try_get_access_token(
         raise ValueError("Login failed and no access token found.")
 
     async with AsyncClient(
-        base_url="https://github.com",
-        headers=standard_headers(),
+            base_url="https://github.com",
+            headers=standard_headers(),
     ) as client:
         device_code_info = await get_device_code(client)
 
@@ -90,9 +87,8 @@ async def try_get_access_token(
 
 async def get_copilot_token() -> DataStrAny:
     async with AsyncClient(
-        base_url="https://api.github.com/",
+            base_url="https://api.github.com/",
     ) as client:
-        interact
         response = await client.get(
             "copilot_internal/v2/token",
             headers={
@@ -107,7 +103,7 @@ async def get_copilot_token() -> DataStrAny:
 
 async def get_usage() -> DataStrAny:
     async with AsyncClient(
-        base_url="https://api.github.com/",
+            base_url="https://api.github.com/",
     ) as client:
         response = await client.get(
             "/copilot_internal/user",
